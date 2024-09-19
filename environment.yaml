@@ -42,7 +42,6 @@ dependencies:
       - cloudpathlib==0.19.0
       - confection==0.1.5
       - cymem==2.0.8
-      - en-core-web-md
       - filelock==3.16.1
       - fsspec==2024.9.0
       - huggingface-hub==0.25.0

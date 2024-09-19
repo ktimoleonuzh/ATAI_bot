@@ -63,6 +63,6 @@ data = {
 "tags": classes
 }
 
-FILE = "./training_data/chat_train_data.pth"
-torch.save(data, FILE)
+model_file = "./training_data/model.pth"
+torch.save(data, model_file)
 

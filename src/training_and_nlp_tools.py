@@ -1,20 +1,22 @@
-from torch.utils.data import Dataset
-import numpy as np
 import random
-from load_data import (
-    header,
-    film_entities, 
-    all_movies_dict, 
-    all_people_dict, 
-    special_movies, 
-    special_chars,
-    indirectSubclassOf_entities,
-    ner
-    )
+import spacy
+import numpy as np
 
 from difflib import SequenceMatcher
+from torch.utils.data import Dataset
+from utils import (
+    header,
+    film_entities,
+    special_chars,
+    ner,
+    load_pickle
+    )
 
-import spacy
+all_movies_dict = load_pickle('./data/all_movies_dict.pickle')
+all_people_dict = load_pickle('./data/all_people_dict.pickle')
+special_movies = load_pickle('./data/special_movies.pickle')
+indirectSubclassOf_entities = load_pickle('./data/indirectSubclassOf_entities.pickle')
+
 nlp = spacy.load("en_core_web_md")
 nlp.add_pipe("entityLinker", last=True)
 

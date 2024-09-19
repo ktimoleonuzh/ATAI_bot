@@ -12,7 +12,8 @@ from training.model import NeuralNet
 from training_and_nlp_tools import (
     process_intents, 
     prepare_training_data, 
-    ChatDataset)
+    ChatDataset
+)
     
 intents = json.loads(open('./data/intents.json').read())
 vocabulary, documents, classes = process_intents(intents)

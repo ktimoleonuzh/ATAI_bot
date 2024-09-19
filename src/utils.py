@@ -10,10 +10,6 @@ import pickle
 import rdflib
 import time
 import json
-from transformers import pipeline
-
-# Initialize NER pipeline
-ner = pipeline('ner')
 
 # FOR QUERIES
 # Define some prefixes and namespaces

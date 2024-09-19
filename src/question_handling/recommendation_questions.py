@@ -7,13 +7,19 @@ Created on Sun Dec 11 15:12:24 2022
 import numpy as np
 import random
 from sklearn.metrics import pairwise_distances
-from load_data import (
-    ent2lbl, 
-    id2ent, 
-    ent2id,
-    entity_emb,
+from utils import (
+    load_embeddings,
+    load_pickle,
     WD
     )
+
+entity_emb, relation_emb, ent2id, id2ent, rel2id, id2rel = load_embeddings(
+    './data/ddis-graph-embeddings/entity_embeds.npy',
+    './data/ddis-graph-embeddings/relation_embeds.npy',
+    './data/ddis-graph-embeddings/entity_ids.del',
+    './data/ddis-graph-embeddings/relation_ids.del'
+)
+ent2lbl = load_pickle('./data/ent2lbl.pickle')
 
 class Rec_Response():
     def __init__(self, graph, linked_entities, intent_responses):

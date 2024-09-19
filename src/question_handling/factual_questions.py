@@ -7,21 +7,28 @@ Created on Tue Nov 29 15:56:15 2022
 import numpy as np
 import random
 from sklearn.metrics import pairwise_distances
-from load_data import (
-    header,
-    ent2lbl, 
-    id2ent, 
-    ent2id, 
-    rel2id, 
-    entity_emb, 
-    relation_emb, 
-    WD,
-    predicate_dict,
-    all_movies_dict,
-    namespace_map,
-    crowd_predicates
-    )
 from training_and_nlp_tools import get_key_from_value, best_match
+from utils import (
+    header,
+    WD,
+    namespace_map,
+    load_embeddings,
+    load_pickle
+    )
+
+entity_emb, relation_emb, ent2id, id2ent, rel2id, id2rel = load_embeddings(
+    './data/ddis-graph-embeddings/entity_embeds.npy',
+    './data/ddis-graph-embeddings/relation_embeds.npy',
+    './data/ddis-graph-embeddings/entity_ids.del',
+    './data/ddis-graph-embeddings/relation_ids.del'
+)
+
+crowd_predicates = load_pickle('./data/crowd_predicates.pickle')
+all_movies_dict = load_pickle('./data/all_movies_dict.pickle')
+predicate_dict = load_pickle('./data/predicate_dict.pickle')
+ent2lbl = load_pickle('./data/ent2lbl.pickle')
+
+
 
 class Query_Response:
     def __init__(self, tag, graph, linked_entities, intent_responses, sentence):

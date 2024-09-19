@@ -10,6 +10,7 @@ import json
 import torch
 
 from src.training.model import NeuralNet
+from src.training_and_nlp_tools import bag_of_words, EntityRecognition
 from src.question_handling.factual_questions import Query_Response
 from src.question_handling.multimedia_questions import Multimedia_Response
 from src.question_handling.recommendation_questions import Rec_Response
@@ -35,7 +36,6 @@ model.eval()
 
 
 def get_response(message, graph, image_data):
-    from src.training_and_nlp_tools import bag_of_words, EntityRecognition
     ER = EntityRecognition(message, graph)
     linked_entities = ER.linked_entities
     word_list = ER.word_list

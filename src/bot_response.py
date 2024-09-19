@@ -9,11 +9,11 @@ import json
 
 import torch
 
-from training.model import NeuralNet
-from training_and_nlp_tools import bag_of_words, EntityRecognition
-from question_handling.factual_questions import Query_Response
-from question_handling.multimedia_questions import Multimedia_Response
-from question_handling.recommendation_questions import Rec_Response
+from src.training.model import NeuralNet
+from src.training_and_nlp_tools import bag_of_words, EntityRecognition
+from src.question_handling.factual_questions import Query_Response
+from src.question_handling.multimedia_questions import Multimedia_Response
+from src.question_handling.recommendation_questions import Rec_Response
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

@@ -4,7 +4,7 @@ import numpy as np
 
 from difflib import SequenceMatcher
 from torch.utils.data import Dataset
-from utils import (
+from src.utils import (
     header,
     film_entities,
     special_chars,

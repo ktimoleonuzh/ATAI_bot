@@ -2,7 +2,7 @@ import time
 import atexit
 import requests  # install the package via "pip install requests"
 from collections import defaultdict
-from bot_response import get_response
+from src.bot_response import get_response
 
 
 # url of the speakeasy server

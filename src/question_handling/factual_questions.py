@@ -7,8 +7,8 @@ Created on Tue Nov 29 15:56:15 2022
 import numpy as np
 import random
 from sklearn.metrics import pairwise_distances
-from training_and_nlp_tools import get_key_from_value, best_match
-from utils import (
+from src.training_and_nlp_tools import get_key_from_value, best_match
+from src.utils import (
     header,
     WD,
     namespace_map,

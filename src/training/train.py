@@ -8,8 +8,8 @@ import json
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from training.model import NeuralNet
-from training_and_nlp_tools import (
+from src.training.model import NeuralNet
+from src.training_and_nlp_tools import (
     process_intents, 
     prepare_training_data, 
     ChatDataset

@@ -1,9 +1,9 @@
 import yaml
 import os
 
-from preprocessing.prepare_data import prepare_data
-from utils import load_graph, load_json
-from agent import MyBot
+from src.preprocessing.prepare_data import prepare_data
+from src.utils import load_graph, load_json
+from src.agent import MyBot
 
 with open('config/nadia_bot_credentials.yaml', 'r') as file:
     credentials = yaml.safe_load(file)

@@ -10,6 +10,7 @@ with open('config/nadia_bot_credentials.yaml', 'r') as file:
 
 username = credentials['username']
 password = credentials['password']
+url = credentials['url']
 
 # First check if the data directory exists
 # If yes, load the data

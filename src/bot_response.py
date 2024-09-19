@@ -17,9 +17,6 @@ from src.question_handling.recommendation_questions import Rec_Response
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-with open('./data/intents.json', 'r') as json_data:
-    intents = json.load(json_data)
-
 model_file = "./training_data/model.pth"
 data = torch.load(model_file)
 
@@ -36,6 +33,9 @@ model.eval()
 
 
 def get_response(message, graph, image_data):
+    with open('./data/intents.json', 'r') as json_data:
+        intents = json.load(json_data)
+
     ER = EntityRecognition(message, graph)
     linked_entities = ER.linked_entities
     word_list = ER.word_list

@@ -2,13 +2,23 @@ import rdflib
 import time
 import yaml
 import pickle
+import os
+import urllib.request
 from question_handling.crowd_questions import Crowd_Response
 from preprocessing.prepare_pickles import build_pickles
 
+# Utility function to download files
+def download_file(url, destination):
+    print(f"Downloading {url} to {destination}...")
+    urllib.request.urlretrieve(url, destination)
+    print(f"Downloaded {url}.")
+
+# Load configuration file
 def load_config():
     with open('config/data_config.yaml', 'r') as file:
         return yaml.safe_load(file)
 
+# Load RDF graph
 def load_graph(graph_path):
     empty_graph = rdflib.Graph()
     start_time = time.time()
@@ -16,6 +26,33 @@ def load_graph(graph_path):
     print(f"--- Loaded graph in: {time.time() - start_time} seconds ---")
     return graph
 
+# Download required data
+def download_data(config):
+    base_url = "https://files.ifi.uzh.ch/ddis/teaching/2023/ATAI/dataset/"
+    
+    # Download graph
+    graph_url = base_url + "ddis-movie-graph.nt.zip"
+    graph_dest = config['paths']['graph_zip_path']
+    download_file(graph_url, graph_dest)
+    
+    # Download crowd data
+    crowd_data_url = base_url + "crowd_data/crowd_data.tsv"
+    crowd_data_dest = config['paths']['crowd_data_path']
+    download_file(crowd_data_url, crowd_data_dest)
+
+    # Download aggregate answers
+    aggr_ans_url = base_url + "crowd_data/crowd_data_olat_P344FullstopCorrected.tsv"
+    aggr_ans_dest = config['paths']['aggr_ans_dict_path']
+    download_file(aggr_ans_url, aggr_ans_dest)
+
+    # Extract the graph if needed
+    if graph_dest.endswith(".zip"):
+        import zipfile
+        with zipfile.ZipFile(graph_dest, 'r') as zip_ref:
+            zip_ref.extractall(os.path.dirname(graph_dest))
+        print(f"Extracted {graph_dest}.")
+
+# Generate movie-related predicates
 def find_movie_predicates(graph, film_entities, namespaces):
     movie_preds = set()
     predicate_dict = {}
@@ -62,6 +99,7 @@ def find_movie_predicates(graph, film_entities, namespaces):
     
     return predicate_dict
 
+# Update predicate dictionary with crowd-sourced data
 def update_predicate_dict_with_crowd_data(graph, aggr_ans_dict, namespaces, predicate_dict):
     crowd_predicates = {}
     header = f"""
@@ -93,7 +131,7 @@ def update_predicate_dict_with_crowd_data(graph, aggr_ans_dict, namespaces, pred
                 """
                 result = list(graph.query(query_pred_label))
                 value = result[0][0].toPython() if result else pred_label
-            elif pred.startswith(namespaces['DDIS']):
+            elif pred.startswith(namespaces['DDIS']): 
                 key = 'ddis:' + pred_label
                 value = pred_label
             elif pred.startswith(namespaces['SCHEMA']):
@@ -109,82 +147,13 @@ def update_predicate_dict_with_crowd_data(graph, aggr_ans_dict, namespaces, pred
     
     return predicate_dict, crowd_predicates
 
-def update_kg_with_crowd_data(graph, aggr_ans_dict):
-    fixed_triples = {}
-    added_triples = {}
-    
-    for task in aggr_ans_dict['crowddata']:
-        crowd_ans = Crowd_Response(task)
-        if crowd_ans.answerId == 2:
-            if crowd_ans.triple in graph:
-                print('Mistake found in KG. Attempting to fix.')
-                if crowd_ans.correction is not None:
-                    print('Fix found. Removing wrong triple and adding correct one.')
-                    graph.remove(crowd_ans.triple)
-                    graph.add(crowd_ans.correction)
-                    fixed_triples[crowd_ans.HITId] = crowd_ans.correction
-        else:
-            if crowd_ans.triple not in graph:
-                print("New triple detected. Checking for collisions.")
-                triple_pattern = (crowd_ans.triple[0], crowd_ans.triple[1], None)
-                triple_generator = graph.triples(triple_pattern)
-                collision_list = [triple for triple in triple_generator]
-                if len(collision_list) == 0:
-                    print("Adding new triple.")
-                    graph.add(crowd_ans.triple)
-                    added_triples[crowd_ans.HITId] = crowd_ans.triple
-                else:
-                    print("Data-type inconsistency. Fixing for simplicity.")
-                    for triple in collision_list:
-                        graph.remove(triple)
-                        graph.add(crowd_ans.triple)
-    
-    return fixed_triples, added_triples
-
-def process_indirectSubclassOf(graph, aggr_ans_dict, namespaces):
-    indirectSubclassOf_triples = {}
-    indirectSubclassOf_entities = {}
-
-    header = f"""
-    prefix wdt: <{namespaces['WDT']}>
-    prefix wd: <{namespaces['WD']}>
-    prefix schema: <{namespaces['SCHEMA']}> 
-    prefix ddis: <{namespaces['DDIS']}>
-    prefix rdfs: <{namespaces['RDFS']}>
-    """
-    
-    for task in aggr_ans_dict['crowddata']:
-        crowd_ans = Crowd_Response(task)
-        if crowd_ans.answerId == 1:
-            triple = crowd_ans.triple
-            subj = triple[0].split('/')[-1]
-            pred = triple[1]
-            obj = triple[2].split('/')[-1]
-            if pred == namespaces['DDIS'] + 'indirectSubclassOf':
-                query_subj_label = header + f"""
-                SELECT ?lbl
-                WHERE {{
-                    wd:{subj} rdfs:label ?lbl.
-                }}
-                """
-                subj_label = list(graph.query(query_subj_label))[0][0].toPython() if list(graph.query(query_subj_label)) else subj
-
-                query_obj_label = header + f"""
-                SELECT ?lbl
-                WHERE {{
-                    wd:{obj} rdfs:label ?lbl.
-                }}
-                """
-                obj_label = list(graph.query(query_obj_label))[0][0].toPython() if list(graph.query(query_obj_label)) else obj
-                
-                indirectSubclassOf_triples[subj] = [obj, crowd_ans.HITId]
-                indirectSubclassOf_entities[subj] = subj_label
-    
-    return indirectSubclassOf_triples, indirectSubclassOf_entities
-
+# Main script logic
 def main():
     # Load configurations
     config = load_config()
+
+    # Download required files
+    download_data(config)
 
     # Load the RDF graph
     graph = load_graph(config['paths']['graph_path'])
@@ -197,48 +166,40 @@ def main():
         '3D film': 'Q229390',
         'live-action/animated film': 'Q25110269'
     }
-    
+
     # Namespaces
     namespaces = config['urls']
 
-    # 1. Process movie-related predicates
+    # Process movie-related predicates
     predicate_dict = find_movie_predicates(graph, film_entities, namespaces)
 
     # Load aggregated answers from crowd
     with open(config['paths']['aggr_ans_dict_path'], 'rb') as handle:
         aggr_ans_dict = pickle.load(handle)
 
-    # 2. Update predicate dictionary with crowd-sourced data
-    predicate_dict, crowd_predicates = update_predicate_dict_with_crowd_data(graph, aggr_ans_dict, namespaces)
+    # Update predicate dictionary with crowd-sourced data
+    predicate_dict, crowd_predicates = update_predicate_dict_with_crowd_data(graph, aggr_ans_dict, namespaces, predicate_dict)
 
-    # 3. Update the knowledge graph (KG) with corrections from crowd data
-    fixed_triples, added_triples = update_kg_with_crowd_data(graph, aggr_ans_dict)
-
-    # 4. Process triples with `indirectSubclassOf` predicate
-    indirectSubclassOf_triples, indirectSubclassOf_entities = process_indirectSubclassOf(graph, aggr_ans_dict, namespaces)
-
-    # Save updated files
+    # Save updated predicate and crowd-sourced data
     with open(config['paths']['predicate_dict_path'], 'wb') as handle:
         pickle.dump(predicate_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
     
     with open(config['paths']['crowd_predicates_path'], 'wb') as handle:
         pickle.dump(crowd_predicates, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    with open(config['paths']['fixed_triples_path'], 'wb') as handle:
-        pickle.dump(fixed_triples, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    # Generate entity-to-label and label-to-entity mappings
+    ent2lbl, lbl2ent = generate_label_mappings(graph)
 
-    with open(config['paths']['added_triples_path'], 'wb') as handle:
-        pickle.dump(added_triples, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    # Save the generated mappings to pickles
+    with open(config['paths']['ent2lbl_path'], 'wb') as handle:
+        pickle.dump(ent2lbl, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    with open(config['paths']['lbl2ent_path'], 'wb') as handle:
+        pickle.dump(lbl2ent, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    with open(config['paths']['indirectSubclassOf_triples_path'], 'wb') as handle:
-        pickle.dump(indirectSubclassOf_triples, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-    with open(config['paths']['indirectSubclassOf_entities_path'], 'wb') as handle:
-        pickle.dump(indirectSubclassOf_entities, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-    # Serialize the updated graph to a file
+    # Serialize the updated graph
     graph.serialize(destination=config['paths']['updated_graph_path'], format='turtle')
 
-if __name__ == "__main__":
-    build_pickles()  # Run the preparation of pickle files
-    main()  # Execute the main logic for predicate processing and updates
+# Run preparation
+def prepare_data():
+    build_pickles()  # Prepare the necessary pickles
+    main()  # Execute the main logic for the dataset

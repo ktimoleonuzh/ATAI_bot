@@ -48,7 +48,6 @@ def load_graph(graph_path, format='turtle'):
         print(f"Error loading graph: {e}")
         return None
 
-graph = load_graph('./data/updated_graph.nt')
 
 # EMBEDDING LOADING
 def load_embeddings(entity_emb_path, relation_emb_path, entity_file, relation_file):
@@ -71,25 +70,6 @@ def load_embeddings(entity_emb_path, relation_emb_path, entity_file, relation_fi
         print(f"Error loading embeddings: {e}")
         return None, None, None, None, None, None
 
-entity_emb, relation_emb, ent2id, id2ent, rel2id, id2rel = load_embeddings(
-    './data/ddis-graph-embeddings/entity_embeds.npy',
-    './data/ddis-graph-embeddings/relation_embeds.npy',
-    './data/ddis-graph-embeddings/entity_ids.del',
-    './data/ddis-graph-embeddings/relation_ids.del'
-)
-
-# Label dictionaries from the knowledge graph
-def load_labels(graph):
-    """Generate entity-to-label and label-to-entity mappings from the graph."""
-    try:
-        ent2lbl = {ent: str(lbl) for ent, lbl in graph.subject_objects(RDFS.label)}
-        lbl2ent = {lbl: ent for ent, lbl in ent2lbl.items()}
-        return ent2lbl, lbl2ent
-    except Exception as e:
-        print(f"Error generating label mappings: {e}")
-        return None, None
-
-ent2lbl, lbl2ent = load_labels(graph)
 
 # MULTIMEDIA LOADING
 def load_json(json_file_path):
@@ -104,7 +84,6 @@ def load_json(json_file_path):
         print(f"Error loading JSON file: {e}")
         return None
 
-image_data = load_json('./data/images.json')
 
 # MOVIE ENTITY DEFINITIONS
 film_entities = {
@@ -126,24 +105,3 @@ def load_pickle(pickle_file_path):
     except Exception as e:
         print(f"Error loading pickle file {pickle_file_path}: {e}")
         return None
-
-added_triples = load_pickle('./data/added_triples.pickle')
-aggr_ans_dict = load_pickle('./data/aggr_ans_dict.pickle')
-all_movies_dict = load_pickle('./data/all_movies_dict.pickle')
-all_people_dict = load_pickle('./data/all_people_dict.pickle')
-crowd_predicates = load_pickle('./data/crowd_predicates.pickle')
-fixed_triples = load_pickle('./data/fixed_triples.pickle')
-indirectSubclassOf_triples = load_pickle('./data/indirectSubclassOf_triples.pickle')
-indirectSubclassOf_entities = load_pickle('./data/indirectSubclassOf_entities.pickle')
-predicate_dict = load_pickle('./data/predicate_dict.pickle')
-special_movies = load_pickle('./data/special_movies.pickle')
-
-# VERIFY LOADING
-def verify_loaded_data():
-    """Check if all necessary data is loaded correctly."""
-    if None in [graph, entity_emb, relation_emb, ent2id, rel2id, image_data, added_triples, aggr_ans_dict]:
-        print("Some data did not load correctly. Please check the logs for errors.")
-    else:
-        print("All data loaded successfully.")
-
-verify_loaded_data()

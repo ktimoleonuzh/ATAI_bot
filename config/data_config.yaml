@@ -1,19 +1,24 @@
 paths:
-  graph_path: './data/14_graph.nt'
-  all_movies_dict_path: './data/all_movies_dict.pickle'
-  all_people_dict_path: './data/all_people_dict.pickle'
-  special_movies_path: './data/special_movies.pickle'
-  predicate_dict_path: './data/predicate_dict.pickle'
-  crowd_predicates_path: './data/crowd_predicates.pickle'
-  aggr_ans_dict_path: './data/aggr_ans_dict.pickle'
-  fixed_triples_path: './data/fixed_triples.pickle'
-  added_triples_path: './data/added_triples.pickle'
-  updated_graph_path: './data/updated_graph.nt'
-  indirectSubclassOf_triples_path: './data/indirectSubclassOf_triples.pickle'
-  indirectSubclassOf_entities_path: './data/indirectSubclassOf_entities.pickle'
+  data_dir: data/
+  ddis_movie_graph_nt: data/ddis-movie-graph.nt
+  ddis_movie_graph_tsv: data/ddis-movie-graph.tsv
+  ddis_graph_embeddings_zip: data/ddis-graph-embeddings.zip
+  ddis_graph_embeddings_dir: data/graph-embeddings/
+  crowd_data_tsv: data/crowd_data.tsv
+  crowd_data_olat: data/crowd_data_olat_P344FullstopCorrected.tsv
+  plots_csv: data/plots.csv
+  user_comments_csv: data/user-comments.csv
+  ent2lbl_path: data/ent2lbl.pkl
+  lbl2ent_path: data/lbl2ent.pkl
 
 urls:
-  dataset_url: 'https://files.ifi.uzh.ch/ddis/teaching/2023/ATAI/dataset/'
+  ddis_movie_graph_nt: https://files.ifi.uzh.ch/ddis/teaching/2023/ATAI/dataset/ddis-movie-graph.nt.zip
+  ddis_movie_graph_tsv: https://files.ifi.uzh.ch/ddis/teaching/2023/ATAI/dataset/ddis-movie-graph.tsv.zip
+  ddis_graph_embeddings: https://files.ifi.uzh.ch/ddis/teaching/2023/ATAI/dataset/ddis-graph-embeddings.zip
+  crowd_data_tsv: https://files.ifi.uzh.ch/ddis/teaching/2023/ATAI/dataset/crowd_data/crowd_data.tsv
+  crowd_data_olat: https://files.ifi.uzh.ch/ddis/teaching/2023/ATAI/dataset/crowd_data/crowd_data_olat_P344FullstopCorrected.tsv
+  plots_csv: https://files.ifi.uzh.ch/ddis/teaching/2023/ATAI/dataset/plots.csv
+  user_comments_csv: https://files.ifi.uzh.ch/ddis/teaching/2023/ATAI/dataset/user-comments.csv
 
 namespaces:
   WD: 'http://www.wikidata.org/entity/'

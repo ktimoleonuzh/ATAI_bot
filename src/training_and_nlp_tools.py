@@ -1,7 +1,7 @@
 from torch.utils.data import Dataset
 import numpy as np
 import random
-from load_all_data import (
+from load_data import (
     header,
     film_entities, 
     all_movies_dict, 

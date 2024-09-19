@@ -8,7 +8,7 @@ import json
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from model import NeuralNet
+from training.model import NeuralNet
 from training_and_nlp_tools import (
     process_intents, 
     prepare_training_data, 
@@ -28,7 +28,7 @@ num_epochs = 1000
 dataset = ChatDataset(Xtrain, ytrain)
 train_loader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=True, num_workers=0)
 
-device = torch.device('cuda')
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = NeuralNet(input_size, hidden_size, output_size).to(device)
 
 # Loss and optimizer
@@ -63,6 +63,6 @@ data = {
 "tags": classes
 }
 
-FILE = "./data/chat_train_data.pth"
+FILE = "./training_data/chat_train_data.pth"
 torch.save(data, FILE)
 

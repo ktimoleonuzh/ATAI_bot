@@ -4,7 +4,7 @@ Created on Fri Dec  9 14:58:24 2022
 
 @author: Nadia Timoleon
 """
-from load_all_data import namespace_map
+from load_data import namespace_map
 import random
 
 class Multimedia_Response():

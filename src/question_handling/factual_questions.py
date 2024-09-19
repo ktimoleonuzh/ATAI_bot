@@ -7,7 +7,7 @@ Created on Tue Nov 29 15:56:15 2022
 import numpy as np
 import random
 from sklearn.metrics import pairwise_distances
-from load_all_data import (
+from load_data import (
     header,
     ent2lbl, 
     id2ent, 

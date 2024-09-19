@@ -9,18 +9,18 @@ import json
 
 import torch
 
-from model import NeuralNet
+from training.model import NeuralNet
 from training_and_nlp_tools import bag_of_words, EntityRecognition
-from query_based_answers import Query_Response
-from multimedia_answers import Multimedia_Response
-from recommendation_answers import Rec_Response
+from question_handling.factual_questions import Query_Response
+from question_handling.multimedia_questions import Multimedia_Response
+from question_handling.recommendation_questions import Rec_Response
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 with open('./data/intents.json', 'r') as json_data:
     intents = json.load(json_data)
 
-FILE = "./data/chat_train_data.pth"
+FILE = "./training_data/chat_train_data.pth"
 data = torch.load(FILE)
 
 model_state = data["model_state"]

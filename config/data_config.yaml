@@ -1,0 +1,23 @@
+paths:
+  graph_path: './data/14_graph.nt'
+  all_movies_dict_path: './data/all_movies_dict.pickle'
+  all_people_dict_path: './data/all_people_dict.pickle'
+  special_movies_path: './data/special_movies.pickle'
+  predicate_dict_path: './data/predicate_dict.pickle'
+  crowd_predicates_path: './data/crowd_predicates.pickle'
+  aggr_ans_dict_path: './data/aggr_ans_dict.pickle'
+  fixed_triples_path: './data/fixed_triples.pickle'
+  added_triples_path: './data/added_triples.pickle'
+  updated_graph_path: './data/updated_graph.nt'
+  indirectSubclassOf_triples_path: './data/indirectSubclassOf_triples.pickle'
+  indirectSubclassOf_entities_path: './data/indirectSubclassOf_entities.pickle'
+
+urls:
+  dataset_url: 'https://files.ifi.uzh.ch/ddis/teaching/2023/ATAI/dataset/'
+
+namespaces:
+  WD: 'http://www.wikidata.org/entity/'
+  WDT: 'http://www.wikidata.org/prop/direct/'
+  DDIS: 'http://ddis.ch/atai/'
+  RDFS: 'http://www.w3.org/2000/01/rdf-schema#'
+  SCHEMA: 'http://schema.org/'

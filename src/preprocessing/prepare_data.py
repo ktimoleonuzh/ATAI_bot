@@ -4,8 +4,8 @@ import yaml
 import pickle
 import os
 import urllib.request
-from question_handling.crowd_questions import Crowd_Response
-from preprocessing.prepare_pickles import build_pickles
+from src.question_handling.crowd_questions import Crowd_Response
+from src.preprocessing.prepare_pickles import build_pickles
 
 # Utility function to download files
 def download_file(url, destination):

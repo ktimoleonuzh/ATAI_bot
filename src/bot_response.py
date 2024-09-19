@@ -18,7 +18,7 @@ from src.question_handling.recommendation_questions import Rec_Response
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 model_file = "./training_data/model.pth"
-data = torch.load(model_file, map_location=device)
+data = torch.load(model_file, map_location=device, weights_only=True)
 
 model_state = data["model_state"]
 input_size = data["input_size"]

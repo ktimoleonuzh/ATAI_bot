@@ -28,8 +28,6 @@ dependencies:
   - tk=8.6.14
   - traitlets=5.14.3
   - typing_extensions=4.11.0
-  - vc=14.40
-  - vs2015_runtime=14.40.33807
   - wcwidth=0.2.5
   - wheel=0.44.0
   - xz=5.4.6

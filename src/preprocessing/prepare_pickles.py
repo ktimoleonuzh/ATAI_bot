@@ -14,9 +14,6 @@ def prepare_special_movies(movies, special_chars):
     special_movies = [movie for movie in movies if any(char in movie for char in special_chars)]
     return special_movies
 
-def preprocess_crowd_data(aggr_ans_dict, crowd_questions):
-    # Implement your preprocess logic here if needed
-    return aggr_ans_dict
 
 def build_pickles():
     config = load_config()
@@ -37,11 +34,9 @@ def build_pickles():
     save_pickle(crowd_predicates, config['paths']['crowd_predicates_path'])
     save_pickle(aggr_ans_dict, config['paths']['aggr_ans_dict_path'])
 
+
     # Additional Pickles (add your logic for generating these if needed)
     save_pickle({}, config['paths']['fixed_triples_path'])
     save_pickle({}, config['paths']['added_triples_path'])
     save_pickle({}, config['paths']['indirectSubclassOf_triples_path'])
     save_pickle({}, config['paths']['indirectSubclassOf_entities_path'])
-
-if __name__ == '__main__':
-    build_pickles()

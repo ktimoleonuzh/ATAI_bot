@@ -8,7 +8,8 @@ listen_freq = 2
 
 class MyBot:
     def __init__(self, username, password, url ,graph, image_data):
-        self.agent_details = self.login(username, password)
+        self.agent_details = self.login(username, password, url)
+        self.url = url
         self.session_token = self.agent_details['sessionToken']
         self.chat_state = defaultdict(lambda: {'messages': defaultdict(dict), 'initiated': False, 'my_alias': None})
         self.knownledge_graph = graph
@@ -45,19 +46,19 @@ class MyBot:
                         
             time.sleep(listen_freq)
 
-    def login(self, username: str, password: str):
+    def login(self, username: str, password: str, url: str):
         agent_details = requests.post(url=url + "/api/login", json={"username": username, "password": password}).json()
         print('- User {} successfully logged in with session \'{}\'!'.format(agent_details['userDetails']['username'], agent_details['sessionToken']))
         return agent_details
 
     def check_rooms(self, session_token: str):
-        return requests.get(url=url + "/api/rooms", params={"session": session_token}).json()
+        return requests.get(url=self.url + "/api/rooms", params={"session": session_token}).json()
 
     def check_room_state(self, room_id: str, since: int, session_token: str):
-        return requests.get(url=url + "/api/room/{}/{}".format(room_id, since), params={"roomId": room_id, "since": since, "session": session_token}).json()
+        return requests.get(url=self.url + "/api/room/{}/{}".format(room_id, since), params={"roomId": room_id, "since": since, "session": session_token}).json()
 
     def post_message(self, room_id: str, session_token: str, message: str):
-        tmp_des = requests.post(url=url + "/api/room/{}".format(room_id),
+        tmp_des = requests.post(url=self.url + "/api/room/{}".format(room_id),
                                 params={"roomId": room_id, "session": session_token}, data=message.encode('utf-8')).json()
         if tmp_des['description'] != 'Message received':
             print('\t\t Error: failed to post message: {}'.format(message))
@@ -66,5 +67,5 @@ class MyBot:
         return time.strftime("%H:%M:%S, %d-%m-%Y", time.localtime())
 
     def logout(self):
-        if requests.get(url=url + "/api/logout", params={"session": self.session_token}).json()['description'] == 'Logged out':
+        if requests.get(url=self.url + "/api/logout", params={"session": self.session_token}).json()['description'] == 'Logged out':
             print('- Session \'{}\' successfully logged out!'.format(self.session_token))

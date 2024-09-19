@@ -4,13 +4,16 @@ import numpy as np
 
 from difflib import SequenceMatcher
 from torch.utils.data import Dataset
+from transformers import pipeline
 from src.utils import (
     header,
     film_entities,
     special_chars,
-    ner,
     load_pickle
     )
+
+# Initialize NER pipeline
+ner = pipeline('ner')
 
 all_movies_dict = load_pickle('./data/all_movies_dict.pickle')
 all_people_dict = load_pickle('./data/all_people_dict.pickle')

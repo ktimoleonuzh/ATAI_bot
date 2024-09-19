@@ -1,9 +1,10 @@
-import rdflib
 import time
 import yaml
 import pickle
 import os
 import urllib.request
+import rdflib
+from rdflib.namespace import RDFS
 from src.question_handling.crowd_questions import Crowd_Response
 from src.preprocessing.prepare_pickles import build_pickles
 
@@ -147,6 +148,18 @@ def update_predicate_dict_with_crowd_data(graph, aggr_ans_dict, namespaces, pred
     
     return predicate_dict, crowd_predicates
 
+
+def generate_label_mappings(graph):
+    """Generate entity-to-label and label-to-entity mappings from the graph."""
+    try:
+        ent2lbl = {ent: str(lbl) for ent, lbl in graph.subject_objects(RDFS.label)}
+        lbl2ent = {lbl: ent for ent, lbl in ent2lbl.items()}
+        return ent2lbl, lbl2ent
+    except Exception as e:
+        print(f"Error generating label mappings: {e}")
+        return None, None
+
+
 # Main script logic
 def main():
     # Load configurations
@@ -201,5 +214,5 @@ def main():
 
 # Run preparation
 def prepare_data():
-    build_pickles()  # Prepare the necessary pickles
     main()  # Execute the main logic for the dataset
+    build_pickles()  # Prepare the necessary pickles

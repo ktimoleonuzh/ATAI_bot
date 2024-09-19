@@ -1,16 +1,13 @@
 import time
 import atexit
-import requests  # install the package via "pip install requests"
+import requests
 from collections import defaultdict
 from src.bot_response import get_response
 
-
-# url of the speakeasy server
-url = 'https://speakeasy.ifi.uzh.ch'
 listen_freq = 2
 
 class MyBot:
-    def __init__(self, username, password, graph, image_data):
+    def __init__(self, username, password, url ,graph, image_data):
         self.agent_details = self.login(username, password)
         self.session_token = self.agent_details['sessionToken']
         self.chat_state = defaultdict(lambda: {'messages': defaultdict(dict), 'initiated': False, 'my_alias': None})

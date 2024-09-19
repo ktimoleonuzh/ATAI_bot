@@ -25,6 +25,6 @@ graph = load_graph('./data/updated_graph.nt')
 image_data = load_json('./data/multimedia.json')
 
 # Initialize the bot
-mybot = MyBot(username, password, graph, image_data)
+mybot = MyBot(username, password, url, graph, image_data)
 mybot.listen()
 

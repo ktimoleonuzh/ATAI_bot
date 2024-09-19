@@ -1,15 +1,13 @@
 paths:
   data_dir: data/
   ddis_movie_graph_nt: data/ddis-movie-graph.nt
-  ddis_movie_graph_tsv: data/ddis-movie-graph.tsv
   ddis_graph_embeddings_zip: data/ddis-graph-embeddings.zip
   ddis_graph_embeddings_dir: data/graph-embeddings/
   crowd_data_tsv: data/crowd_data.tsv
-  crowd_data_olat: data/crowd_data_olat_P344FullstopCorrected.tsv
-  plots_csv: data/plots.csv
-  user_comments_csv: data/user-comments.csv
   ent2lbl_path: data/ent2lbl.pkl
   lbl2ent_path: data/lbl2ent.pkl
+  graph_path: data/graph.nt
+  graph_zip_path: data/graph.zip
 
 urls:
   ddis_movie_graph_nt: https://files.ifi.uzh.ch/ddis/teaching/2023/ATAI/dataset/ddis-movie-graph.nt.zip

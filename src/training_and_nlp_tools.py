@@ -1,35 +1,47 @@
 import random
 import spacy
 import numpy as np
-
 from difflib import SequenceMatcher
 from torch.utils.data import Dataset
 from transformers import pipeline
-from src.utils import (
-    header,
-    film_entities,
-    special_chars,
-    load_pickle
-    )
+from src.utils import header, film_entities, special_chars, load_pickle
 
-# Initialize NER pipeline
-ner = pipeline('ner')
+# Lazy loading: these variables will only be loaded when needed
+nlp = None
+ner = None
+all_movies_dict = None
+all_people_dict = None
+special_movies = None
+indirectSubclassOf_entities = None
 
-all_movies_dict = load_pickle('./data/all_movies_dict.pickle')
-all_people_dict = load_pickle('./data/all_people_dict.pickle')
-special_movies = load_pickle('./data/special_movies.pickle')
-indirectSubclassOf_entities = load_pickle('./data/indirectSubclassOf_entities.pickle')
-
-nlp = spacy.load("en_core_web_md")
-nlp.add_pipe("entityLinker", last=True)
+def load_resources():
+    """Load all models and dictionaries if they are not already loaded."""
+    global nlp, ner, all_movies_dict, all_people_dict, special_movies, indirectSubclassOf_entities
+    if nlp is None:
+        nlp = spacy.load("en_core_web_md")
+        nlp.add_pipe("entityLinker", last=True)
+    if ner is None:
+        ner = pipeline('ner')
+    if all_movies_dict is None:
+        all_movies_dict = load_pickle('./data/all_movies_dict.pickle')
+    if all_people_dict is None:
+        all_people_dict = load_pickle('./data/all_people_dict.pickle')
+    if special_movies is None:
+        special_movies = load_pickle('./data/special_movies.pickle')
+    if indirectSubclassOf_entities is None:
+        indirectSubclassOf_entities = load_pickle('./data/indirectSubclassOf_entities.pickle')
 
 
 def token_lem(sentence):
+    """Get the lemmatized tokens of a sentence."""
+    load_resources()  # Ensure resources are loaded
     word_list = [token.lemma_ for token in nlp(sentence) if not token.is_punct]
     return word_list
 
+
 class EntityRecognition():
     def __init__(self, sentence, graph):
+        load_resources()  # Ensure resources are loaded
         if sentence[-1] == '?':
             self.sentence = sentence.split('?')[0]
         else:
@@ -40,7 +52,7 @@ class EntityRecognition():
         if self.linked_entities is not None:
             self.word_list = self.token_lem()
         else:
-            self.word_list = [token.lemma_ for token in nlp(self.sentence) if (not token.is_punct)&(token.pos_!='PROPN')]
+            self.word_list = [token.lemma_ for token in nlp(self.sentence) if (not token.is_punct) & (token.pos_ != 'PROPN')]
             print("No entities detected.")
             
     def find_entities(self):
@@ -245,6 +257,8 @@ def bag_of_words(vocabulary, sentence):
     return bag
 
 def process_intents(intents):
+    """Process intents for training."""
+    load_resources()  # Ensure resources are loaded
     vocabulary = []
     documents = []
     classes = []

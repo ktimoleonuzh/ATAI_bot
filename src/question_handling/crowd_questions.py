@@ -5,7 +5,7 @@ Created on Tue Dec 13 11:57:03 2022
 @author: Nadia Timoleon
 """
 from rdflib.term import Literal
-from src.preprocessing.preprocess_crowddata import namespace_map
+from src.utils import namespace_map
 
 
 class Crowd_Response:

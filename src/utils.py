@@ -10,26 +10,22 @@ import pickle
 import rdflib
 import time
 import json
+from src.preprocessing.prepare_data import load_config
 
-# FOR QUERIES
-# Define some prefixes and namespaces
-WD = rdflib.Namespace('http://www.wikidata.org/entity/')
-WDT = rdflib.Namespace('http://www.wikidata.org/prop/direct/')
-DDIS = rdflib.Namespace('http://ddis.ch/atai/')
-RDFS = rdflib.namespace.RDFS
-SCHEMA = rdflib.Namespace('http://schema.org/')
 
+# For SPARQL queries
 header = '''
     prefix wdt: <http://www.wikidata.org/prop/direct/>
     prefix wd: <http://www.wikidata.org/entity/>
     prefix schema: <http://schema.org/> 
     prefix ddis: <http://ddis.ch/atai/>'''
 
+config = load_config()
 namespace_map = {
-    'wd': WD,
-    'wdt': WDT,
-    'schema': SCHEMA,
-    'ddis': DDIS
+    'wd': rdflib.Namespace(config['namespaces']['wd']),
+    'wdt': rdflib.Namespace(config['namespaces']['wdt']),
+    'schema': rdflib.Namespace(config['namespaces']['schema']),
+    'ddis': rdflib.Namespace(config['namespaces']['ddis'])
 }
 
 # KNOWLEDGE GRAPH LOADING

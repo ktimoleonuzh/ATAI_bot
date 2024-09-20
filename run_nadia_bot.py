@@ -21,11 +21,12 @@ if not os.path.exists('data'):
     prepare_data()
 else:
     print(f"--- Data found. Loading the data... ---")
+    # TODO: verify data loading
 
 graph = load_graph('./data/updated_graph.nt')
 image_data = load_json('./data/multimedia.json')
 
 # Initialize the bot
 mybot = MyBot(username, password, url, graph, image_data)
-mybot.listen()
+# mybot.listen()
 

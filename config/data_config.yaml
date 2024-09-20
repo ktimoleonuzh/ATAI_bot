@@ -1,22 +1,31 @@
 paths:
-  data_dir: data/
-  ddis_movie_graph_nt: data/ddis-movie-graph.nt
-  ddis_graph_embeddings_zip: data/ddis-graph-embeddings.zip
-  ddis_graph_embeddings_dir: data/graph-embeddings/
-  crowd_data_tsv: data/crowd_data.tsv
-  ent2lbl_path: data/ent2lbl.pkl
-  lbl2ent_path: data/lbl2ent.pkl
-  graph_path: data/graph.nt
-  graph_zip_path: data/graph.zip
+  data_dir: data/ddis/
+  embeddings_zip: data/ddis/graph-embeddings.zip
+  crowd_data: data/ddis/crowd_data.tsv
+  graph: data/ddis/14_graph.nt
+  graph_zip: data/ddis/graph.zip
+  images: data/ddis/images.json
+  images_zip: data/ddis/images.json.zip
+
+paths_processed:
+  processed_data_dir: data/processed/
+  ent2lbl: data/processed/ent2lbl.pkl
+  lbl2ent: data/processed/lbl2ent.pkl
+  predicate_dict: data/processed/predicate_dict.pkl
+  crowd_predicates: data/processed/crowd_predicates.pkl
+  aggr_ans_dict: data/processed/aggr_ans_dict.pkl
+  fixed_triples: data/processed/fixed_triples.pkl
+  added_triples: data/processed/added_triples.pkl
+  indirectSubclassOf_triples: data/processed/indirectSubclassOf_triples.pkl
+  indirectSubclassOf_entities: data/processed/indirectSubclassOf_entities.pkl
+  special_movies: data/processed/special_movies.pkl
 
 urls:
+  base_url: https://files.ifi.uzh.ch/ddis/teaching/2023/ATAI/dataset/
   ddis_movie_graph_nt: https://files.ifi.uzh.ch/ddis/teaching/2023/ATAI/dataset/ddis-movie-graph.nt.zip
-  ddis_movie_graph_tsv: https://files.ifi.uzh.ch/ddis/teaching/2023/ATAI/dataset/ddis-movie-graph.tsv.zip
   ddis_graph_embeddings: https://files.ifi.uzh.ch/ddis/teaching/2023/ATAI/dataset/ddis-graph-embeddings.zip
   crowd_data_tsv: https://files.ifi.uzh.ch/ddis/teaching/2023/ATAI/dataset/crowd_data/crowd_data.tsv
-  crowd_data_olat: https://files.ifi.uzh.ch/ddis/teaching/2023/ATAI/dataset/crowd_data/crowd_data_olat_P344FullstopCorrected.tsv
-  plots_csv: https://files.ifi.uzh.ch/ddis/teaching/2023/ATAI/dataset/plots.csv
-  user_comments_csv: https://files.ifi.uzh.ch/ddis/teaching/2023/ATAI/dataset/user-comments.csv
+  images: https://files.ifi.uzh.ch/ddis/teaching/2023/ATAI/dataset/movienet/images.json.zip
 
 namespaces:
   WD: 'http://www.wikidata.org/entity/'

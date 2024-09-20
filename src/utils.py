@@ -4,42 +4,66 @@ Created on Wed Dec 14 17:45:08 2022
 
 @author: Nadia Timoleon
 """
-import numpy as np
 import csv
+import os
 import pickle
 import rdflib
 import time
 import json
-from src.preprocessing.prepare_data import load_config
+import yaml
+import spacy
+import zipfile
+import urllib.request
+import numpy as np
+from transformers import pipeline
+from tqdm import tqdm
 
+# Utility function to download files, with progress bar
+def download_file(url, destination):
+    # Open the URL connection
+    with urllib.request.urlopen(url) as response:
+        # Get the total file size
+        total_size = int(response.info().get('Content-Length').strip())
+        # Open the destination file in write-binary mode
+        with open(destination, 'wb') as out_file:
+            # Set up tqdm progress bar
+            with tqdm(total=total_size, unit='B', unit_scale=True, desc=destination, ascii=True) as progress_bar:
+                # Read the data in chunks
+                chunk_size = 1024
+                while True:
+                    data = response.read(chunk_size)
+                    if not data:
+                        break
+                    out_file.write(data)
+                    progress_bar.update(len(data))
 
-# For SPARQL queries
-header = '''
-    prefix wdt: <http://www.wikidata.org/prop/direct/>
-    prefix wd: <http://www.wikidata.org/entity/>
-    prefix schema: <http://schema.org/> 
-    prefix ddis: <http://ddis.ch/atai/>'''
+def unzip_file(zip_file, destination_dir):
+    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+        zip_ref.extractall(destination_dir)
+    print(f"Downloaded and extracted file to {destination_dir}.")
+    # Optionally delete the zip file
+    os.remove(zip_file)
 
-config = load_config()
-namespace_map = {
-    'wd': rdflib.Namespace(config['namespaces']['wd']),
-    'wdt': rdflib.Namespace(config['namespaces']['wdt']),
-    'schema': rdflib.Namespace(config['namespaces']['schema']),
-    'ddis': rdflib.Namespace(config['namespaces']['ddis'])
-}
+def load_resources():
+    """Load all models and dictionaries ."""
+    nlp = spacy.load("en_core_web_md")
+    nlp.add_pipe("entityLinker", last=True)
+    ner = pipeline('ner')
+    # TODO: move to data loading
+    return nlp, ner
 
 # KNOWLEDGE GRAPH LOADING
 def load_graph(graph_path, format='turtle'):
     """Load an RDF graph from a file."""
     try:
         start_time = time.time()
+        print(f"--- Loading graph from {graph_path} ---")
         graph = rdflib.Graph().parse(graph_path, format=format)
         print(f"--- Loaded graph in: {time.time() - start_time} seconds ---")
         return graph
     except Exception as e:
         print(f"Error loading graph: {e}")
         return None
-
 
 # EMBEDDING LOADING
 def load_embeddings(entity_emb_path, relation_emb_path, entity_file, relation_file):
@@ -62,6 +86,39 @@ def load_embeddings(entity_emb_path, relation_emb_path, entity_file, relation_fi
         print(f"Error loading embeddings: {e}")
         return None, None, None, None, None, None
 
+# CONFIGURATION LOADING
+def load_data_config():
+    """Load configuration data from a YAML file."""
+    try:
+        with open('config/data_config.yaml', 'r') as f:
+            return yaml.safe_load(f)
+    except Exception as e:
+        print(f"Error loading configuration: {e}")
+        return None
+
+# TRAINING CONFIG
+def load_training_config():
+    """Load training configuration from a YAML file."""
+    try:
+        with open('config/training_config.yaml', 'r') as f:
+            return yaml.safe_load(f)
+    except Exception as e:
+        print(f"Error loading training configuration: {e}")
+        return None
+    
+# CREDENTIALS LOADING
+def load_credentials():
+    """Load credentials from a YAML file."""
+    try:
+        with open('config/nadia_bot_credentials.yaml', 'r') as f:
+            credentials = yaml.safe_load(f)
+        username = credentials['username']
+        password = credentials['password']
+        url = credentials['url']
+        return username, password, url
+    except Exception as e:
+        print(f"Error loading credentials: {e}")
+        return None
 
 # MULTIMEDIA LOADING
 def load_json(json_file_path):
@@ -77,16 +134,11 @@ def load_json(json_file_path):
         return None
 
 
-# MOVIE ENTITY DEFINITIONS
-film_entities = {
-    'animated feature film': 'Q29168811',
-    'animated film': 'Q202866',
-    'film': 'Q11424',
-    '3D film': 'Q229390',
-    'live-action/animated film': 'Q25110269'
-}
+# SAVE PICKLE FILES
+def save_pickle(data, path):
+    with open(path, 'wb') as handle:
+        pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-special_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ': ', ':', '!', '-']
 
 # LOAD PICKLE FILES
 def load_pickle(pickle_file_path):

@@ -9,9 +9,9 @@ import random
 from sklearn.metrics import pairwise_distances
 from src.utils import (
     load_embeddings,
-    load_pickle,
-    WD
+    load_pickle
     )
+from src.global_variables import WD
 
 entity_emb, relation_emb, ent2id, id2ent, rel2id, id2rel = load_embeddings(
     './data/ddis-graph-embeddings/entity_embeds.npy',

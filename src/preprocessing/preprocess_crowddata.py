@@ -5,18 +5,10 @@ Created on Mon Dec 12 20:05:03 2022
 @author: Nadia Timoleon
 """
 import pandas as pd
-import rdflib
 import numpy as np
 from statsmodels.stats import inter_rater as irr
 
 crowd_data = pd.read_csv('./data/crowd_data.tsv', sep='\t')
-
-# define some prefixes
-WD = rdflib.Namespace('http://www.wikidata.org/entity/')
-WDT = rdflib.Namespace('http://www.wikidata.org/prop/direct/')
-DDIS = rdflib.Namespace('http://ddis.ch/atai/')
-RDFS = rdflib.namespace.RDFS
-SCHEMA = rdflib.Namespace('http://schema.org/')
 
 def track_fast_deceivers(crowd_data):
     min_WorkTime = 10

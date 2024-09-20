@@ -4,66 +4,105 @@ Created on Sun Nov 27 21:36:50 2022
 
 @author: Nadia Timoleon
 """
-import json
 import torch
 import torch.nn as nn
+import numpy as np
 from torch.utils.data import DataLoader
 from src.training.model import NeuralNet
-from src.training_and_nlp_tools import (
-    process_intents, 
-    prepare_training_data, 
-    ChatDataset
-)
+from src.utils import load_json, load_training_config
+from src.training.training_dataset import process_intents, ChatDataset
+
+def bag_of_words(vocabulary, sentence):
+    bag = np.zeros(len(vocabulary), dtype=np.float32)
+    for word in vocabulary:
+        if word in sentence:
+            idx = vocabulary.index(word)
+            bag[idx] += 1
+    return bag
+
+def prepare_training_data(vocabulary, documents, classes, batch_size):
+    Xtrain = list()
+    ytrain = list()
+    for document in documents:
+        bag = bag_of_words(vocabulary, document[0])
+        Xtrain.append(bag)
+        tag = document[1]
+        ytrain.append(classes.index(tag))
+        
+    Xtrain = np.array(Xtrain)
+    ytrain = np.array(ytrain)
+    dataset = ChatDataset(Xtrain, ytrain)
+    train_loader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=True, num_workers=0)
     
-intents = json.loads(open('./data/intents.json').read())
-vocabulary, documents, classes = process_intents(intents)
-Xtrain, ytrain = prepare_training_data(vocabulary, documents, classes)    
+    return train_loader
 
-batch_size = 10
-input_size = len(vocabulary)
-hidden_size = 10
-output_size = len(classes)
-learning_rate = 0.001
-num_epochs = 1000
+def train_model(
+    input_size, hidden_size,
+    output_size, vocabulary,
+    documents, classes,
+    learning_rate, num_epochs,
+    batch_size
+    ): 
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = NeuralNet(input_size, hidden_size, output_size).to(device)
 
-dataset = ChatDataset(Xtrain, ytrain)
-train_loader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=True, num_workers=0)
+    # Loss and optimizer
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = NeuralNet(input_size, hidden_size, output_size).to(device)
+    train_loader = prepare_training_data(vocabulary, documents, classes, batch_size)
 
-# Loss and optimizer
-criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    for epoch in range(num_epochs):
+        for (words, labels) in train_loader:
+            words = words.to(device)
+            labels = labels.to(dtype=torch.long).to(device)
+            
+            # Forward pass
+            outputs = model(words)
+            loss = criterion(outputs, labels)
+            
+            # Backward and optimize
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            
+        if (epoch+1) % 100 == 0:
+            print (f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
 
-for epoch in range(num_epochs):
-    for (words, labels) in train_loader:
-        words = words.to(device)
-        labels = labels.to(dtype=torch.long).to(device)
-        
-        # Forward pass
-        outputs = model(words)
-        loss = criterion(outputs, labels)
-        
-        # Backward and optimize
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-        
-    if (epoch+1) % 100 == 0:
-        print (f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
+    print(f'final loss: {loss.item():.4f}')
+    return model
 
-print(f'final loss: {loss.item():.4f}')
+def main():
+    intents = load_json('./data/intents.json')
+    vocabulary, documents, classes = process_intents(intents)
+    
+    # Hyper-parameters: load from config
+    input_size = len(vocabulary)
+    output_size = len(classes)
+    training_config = load_training_config()
+    hidden_size = training_config['hidden_size']
+    learning_rate = training_config['learning_rate']
+    num_epochs = training_config['num_epochs']
+    batch_size = training_config['batch_size']
+    model_file = training_config['model_file']
 
-data = {
-"model_state": model.state_dict(),
-"input_size": input_size,
-"hidden_size": hidden_size,
-"output_size": output_size,
-"vocabulary": vocabulary,
-"tags": classes
-}
+    trained_model = train_model(
+        input_size, hidden_size,
+        output_size, vocabulary,
+        documents, classes,
+        learning_rate, num_epochs,
+        batch_size
+    )
+    data = {
+    "model_state": trained_model.state_dict(),
+    "input_size": input_size,
+    "hidden_size": hidden_size,
+    "output_size": output_size,
+    "vocabulary": vocabulary,
+    "tags": classes
+    }
 
-model_file = "./training_data/model.pth"
-torch.save(data, model_file)
+    torch.save(data, model_file)
+
+    print(f'model saved to {model_file}')
 

@@ -1,0 +1,5 @@
+batch_size: 10
+hidden_size: 10
+learning_rate: 0.001
+num_epochs: 1000
+model_path: "./training_data/model.pth"

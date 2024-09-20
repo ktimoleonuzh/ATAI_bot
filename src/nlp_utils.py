@@ -1,52 +1,42 @@
-import random
-import spacy
-import numpy as np
+import torch
 from difflib import SequenceMatcher
-from torch.utils.data import Dataset
-from transformers import pipeline
-from src.utils import header, film_entities, special_chars, load_pickle
+from src.training.model import NeuralNet
+from src.global_variables import special_chars, film_entities, header
+from src.utils import load_pickle, load_training_config
 
-# Lazy loading: these variables will only be loaded when needed
-nlp = None
-ner = None
-all_movies_dict = None
-all_people_dict = None
-special_movies = None
-indirectSubclassOf_entities = None
+# TODO: fix token_lem duplicates
 
-def load_resources():
-    """Load all models and dictionaries if they are not already loaded."""
-    global nlp, ner, all_movies_dict, all_people_dict, special_movies, indirectSubclassOf_entities
-    if nlp is None:
-        nlp = spacy.load("en_core_web_md")
-        nlp.add_pipe("entityLinker", last=True)
-    if ner is None:
-        ner = pipeline('ner')
-    if all_movies_dict is None:
-        all_movies_dict = load_pickle('./data/all_movies_dict.pickle')
-    if all_people_dict is None:
-        all_people_dict = load_pickle('./data/all_people_dict.pickle')
-    if special_movies is None:
-        special_movies = load_pickle('./data/special_movies.pickle')
-    if indirectSubclassOf_entities is None:
-        indirectSubclassOf_entities = load_pickle('./data/indirectSubclassOf_entities.pickle')
+def setup_answer_classifier_model():
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+    model_file = load_training_config()['model_path']
+    data = torch.load(model_file, map_location=device, weights_only=True)
 
-def token_lem(sentence):
-    """Get the lemmatized tokens of a sentence."""
-    load_resources()  # Ensure resources are loaded
-    word_list = [token.lemma_ for token in nlp(sentence) if not token.is_punct]
-    return word_list
+    model_state = data["model_state"]
+    input_size = data["input_size"]
+    hidden_size = data["hidden_size"]
+    output_size = data["output_size"]
+    vocabulary = data['vocabulary']
+    tags = data['tags']
 
+    model = NeuralNet(input_size, hidden_size, output_size).to(device)
+    model.load_state_dict(model_state)
+    model.eval()
+    return model, device, vocabulary, tags
 
 class EntityRecognition():
-    def __init__(self, sentence, graph):
-        load_resources()  # Ensure resources are loaded
+    def __init__(self, sentence, graph, nlp, ner):
         if sentence[-1] == '?':
             self.sentence = sentence.split('?')[0]
         else:
             self.sentence = sentence
         self.graph = graph
+        self.nlp = nlp
+        self.ner = ner
+        self.all_movies_dict = load_pickle('./data/all_movies_dict.pickle')
+        self.all_people_dict = load_pickle('./data/all_people_dict.pickle')
+        self.special_movies = load_pickle('./data/special_movies.pickle')
+        self.indirectSubclassOf_entities = load_pickle('./data/indirectSubclassOf_entities.pickle')
         self.movies, self.people, self.misc = self.find_entities()
         self.linked_entities = self.map_all_entities()
         if self.linked_entities is not None:
@@ -54,6 +44,11 @@ class EntityRecognition():
         else:
             self.word_list = [token.lemma_ for token in nlp(self.sentence) if (not token.is_punct) & (token.pos_ != 'PROPN')]
             print("No entities detected.")
+
+    def token_lem(self, sentence):
+        """Get the lemmatized tokens of a sentence."""
+        word_list = [token.lemma_ for token in self.nlp(sentence) if not token.is_punct]
+        return word_list
             
     def find_entities(self):
         # we only append IDs in these lists!
@@ -69,22 +64,22 @@ class EntityRecognition():
             if letter in special_chars:
                 is_special = True
         if is_special:
-            best_match_label = best_match(self.sentence, special_movies)
-            best_match_id = get_key_from_value(best_match_label, all_movies_dict)
+            best_match_label = best_match(self.sentence, self.special_movies)
+            best_match_id = get_key_from_value(best_match_label, self.all_movies_dict)
             special.append(best_match_id)
             print("Special movie detected: {}, {}, {}.".format(best_match_label, best_match_id, self.get_entity_description(best_match_id)))
         # only for indirectSubclassOf predicate
         # look in subject dictionary
-        for misc_entity in indirectSubclassOf_entities.values():
+        for misc_entity in self.indirectSubclassOf_entities.values():
             if misc_entity in self.sentence:
-                misc_entity_id = get_key_from_value(misc_entity, indirectSubclassOf_entities)
+                misc_entity_id = get_key_from_value(misc_entity, self.indirectSubclassOf_entities)
                 misc.append(misc_entity_id)
-                print("Miscellaneous entity detected: {}, {}, {}.".format(misc_entity, self.get_entity_description(misc_entity_id), indirectSubclassOf_entities[misc_entity_id]))
+                print("Miscellaneous entity detected: {}, {}, {}.".format(misc_entity, self.get_entity_description(misc_entity_id), self.indirectSubclassOf_entities[misc_entity_id]))
         # Normal Movie Titles/People
         # 1. spacy NER
         # 2. check if film/person
         print("Checking spacy NER.")
-        entities_obj = nlp(self.sentence)._.linkedEntities
+        entities_obj = self.nlp(self.sentence)._.linkedEntities
         entities_1 = ['Q'+str(entity.get_id()) for entity in entities_obj]
         entities_1_labels = [entity for entity in entities_obj]
         for idx, entity in enumerate(entities_1):
@@ -102,39 +97,39 @@ class EntityRecognition():
         # 2. iterate through people
         # 3. iterate through movies
         print("Checking huggingface NER.")
-        entities_ner = ner(self.sentence, aggregation_strategy="simple")
+        entities_ner = self.ner(self.sentence, aggregation_strategy="simple")
         entities_2 = []
         for entity in entities_ner:
             entities_2.append(entity["word"])
         for entity in entities_2:
-            if entity in all_movies_dict.values():
-                entity_key = get_key_from_value(entity, all_movies_dict)
+            if entity in self.all_movies_dict.values():
+                entity_key = get_key_from_value(entity, self.all_movies_dict)
                 movies_2.append(entity_key)
                 print("Movie detected: {}, {}, {}.".format(entity, entity_key, self.get_entity_description(entity_key)))
-            elif entity in all_people_dict.values():
-                entity_key = get_key_from_value(entity, all_people_dict)
+            elif entity in self.all_people_dict.values():
+                entity_key = get_key_from_value(entity, self.all_people_dict)
                 people_2.append(entity_key)
                 print("Person detected: {}, {}, {}.".format(entity, entity_key, self.get_entity_description(entity_key)))
             # in case a The should've been included in the title
-            elif "The "+entity in all_movies_dict.values():
+            elif "The "+entity in self.all_movies_dict.values():
                 entity = "The "+entity
-                entity_key = get_key_from_value(entity, all_movies_dict)
+                entity_key = get_key_from_value(entity, self.all_movies_dict)
                 movies_2.append(entity_key)
                 print("Movie detected: {}, {}, {}.".format(entity, entity_key, self.get_entity_description(entity_key)))
             # in case an unnecessary The has been included in the title
             elif "The " in entity:
-                if entity.split("The ")[1] in all_movies_dict.values():
+                if entity.split("The ")[1] in self.all_movies_dict.values():
                     entity = entity.split("The ")[1]
-                    entity_key = get_key_from_value(entity, all_movies_dict)
+                    entity_key = get_key_from_value(entity, self.all_movies_dict)
                     movies_2.append(entity_key)
                     print("Movie detected: {}, {}, {}.".format(entity, entity_key, self.get_entity_description(entity_key))) 
         # Find best option between 2 NER models
         #special_labels = [all_movies_dict[i] for i in special]
-        movies_1_labels = [all_movies_dict[i] for i in movies_1]
-        movies_2_labels = [all_movies_dict[i] for i in movies_2]
+        movies_1_labels = [self.all_movies_dict[i] for i in movies_1]
+        movies_2_labels = [self.all_movies_dict[i] for i in movies_2]
         movies = list()
         if (len(movies_1) == len(movies_2)) & (len(movies_1) != 0):
-            movies_best_match = get_key_from_value(best_match(self.sentence, movies_1_labels+movies_2_labels), all_movies_dict)
+            movies_best_match = get_key_from_value(best_match(self.sentence, movies_1_labels+movies_2_labels), self.all_movies_dict)
             movies.append(movies_best_match)
         elif len(movies_1) > len(movies_2):
             movies.extend(movies_1)
@@ -145,17 +140,17 @@ class EntityRecognition():
         if len(movies)==0:
             movies = None
         if movies is not None:
-            movies_labels = [all_movies_dict[i] for i in movies]
+            movies_labels = [self.all_movies_dict[i] for i in movies]
             print("Movies detected: {}".format(movies_labels))
         else:
             print("No movies detected")
         
         people = list()
-        people_1_labels = [all_people_dict[i] for i in people_1]
-        people_2_labels = [all_people_dict[i] for i in people_2]
+        people_1_labels = [self.all_people_dict[i] for i in people_1]
+        people_2_labels = [self.all_people_dict[i] for i in people_2]
 
         if (len(people_1) == len(people_2)) & (len(people_1) != 0):
-            people_best_match = get_key_from_value(best_match(self.sentence, people_1_labels+people_2_labels), all_people_dict)
+            people_best_match = get_key_from_value(best_match(self.sentence, people_1_labels+people_2_labels), self.all_people_dict)
             people.append(people_best_match)
         elif len(people_1) > len(people_2):
             people.extend(people_1)
@@ -164,7 +159,7 @@ class EntityRecognition():
         else: 
             people = None
         if people is not None:
-            people_labels = [all_people_dict[i] for i in people]
+            people_labels = [self.all_people_dict[i] for i in people]
             print("People detected: {}".format(people_labels))
         else:
             print("No people detected.")
@@ -179,13 +174,13 @@ class EntityRecognition():
         linked_entities = dict()
         if self.movies is not None:
             for movie in self.movies:
-                linked_entities[movie] = all_movies_dict[movie]
+                linked_entities[movie] = self.all_movies_dict[movie]
         if self.people is not None:
             for people in self.people:
-                linked_entities[people] = all_people_dict[people]
+                linked_entities[people] = self.all_people_dict[people]
         if self.misc is not None:
             for misc in self.misc:
-                linked_entities[misc] = indirectSubclassOf_entities[misc]
+                linked_entities[misc] = self.indirectSubclassOf_entities[misc]
         if len(linked_entities) == 0:
             linked_entities = None
         return linked_entities
@@ -218,7 +213,7 @@ class EntityRecognition():
     def token_lem(self):
         word_list = list()
         for entities in list(self.linked_entities.values()):
-            word_list.extend([token.lemma_ for token in nlp(self.sentence) if (not token.is_punct)&(token.text not in entities)&(token.pos_!='PROPN')])
+            word_list.extend([token.lemma_ for token in self.nlp(self.sentence) if (not token.is_punct)&(token.text not in entities)&(token.pos_!='PROPN')])
         return list(set(word_list))
     
     def get_entity_description(self, entity):
@@ -247,55 +242,3 @@ def best_match(pattern, candidates):
 def get_key_from_value(value, dictionary):
     key = list(dictionary.keys())[list(dictionary.values()).index(value)]
     return key
-
-def bag_of_words(vocabulary, sentence):
-    bag = np.zeros(len(vocabulary), dtype=np.float32)
-    for word in vocabulary:
-        if word in sentence:
-            idx = vocabulary.index(word)
-            bag[idx] += 1
-    return bag
-
-def process_intents(intents):
-    """Process intents for training."""
-    load_resources()  # Ensure resources are loaded
-    vocabulary = []
-    documents = []
-    classes = []
-    for intent in intents['intents']:
-        for pattern in intent['patterns']:
-            word_list = token_lem(pattern)
-            vocabulary.extend(word_list)
-            documents.append((word_list, intent['tag']))
-            if intent['tag'] not in classes:
-                classes.append(intent['tag'])
-
-    vocabulary = sorted(set(vocabulary))
-    random.shuffle(documents)
-    return vocabulary, documents, classes
-
-def prepare_training_data(vocabulary, documents, classes):
-    Xtrain = list()
-    ytrain = list()
-    for document in documents:
-        bag = bag_of_words(vocabulary, document[0])
-        Xtrain.append(bag)
-        tag = document[1]
-        ytrain.append(classes.index(tag))
-        
-    Xtrain = np.array(Xtrain)
-    ytrain = np.array(ytrain)
-    
-    return Xtrain, ytrain
-
-class ChatDataset(Dataset):
-    def __init__(self, Xtrain, ytrain):
-        self.n_samples = len(Xtrain)
-        self.x_data = Xtrain
-        self.y_data = ytrain
-    
-    def __getitem__(self, idx):
-        return self.x_data[idx], self.y_data[idx]
-    
-    def __len__(self):
-        return self.n_samples

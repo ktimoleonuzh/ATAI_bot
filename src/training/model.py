@@ -22,5 +22,4 @@ class NeuralNet(nn.Module):
         out = self.l3(out)
         # we don't need activation or softmax in the final layer since we'll
         # use cross entropy
-        
         return out

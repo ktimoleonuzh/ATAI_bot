@@ -7,14 +7,16 @@ Created on Tue Nov 29 15:56:15 2022
 import numpy as np
 import random
 from sklearn.metrics import pairwise_distances
-from src.training_and_nlp_tools import get_key_from_value, best_match
+from src.nlp_utils import get_key_from_value, best_match
 from src.utils import (
-    header,
-    WD,
-    namespace_map,
     load_embeddings,
     load_pickle
     )
+from src.global_variables import (
+    header,
+    namespace_map,
+    WD
+)
 
 entity_emb, relation_emb, ent2id, id2ent, rel2id, id2rel = load_embeddings(
     './data/ddis-graph-embeddings/entity_embeds.npy',

@@ -4,8 +4,6 @@ from src.training.model import NeuralNet
 from src.global_variables import special_chars, film_entities, header
 from src.utils import load_pickle, load_training_config, load_data_config
 
-# TODO: fix token_lem duplicates
-
 def setup_answer_classifier_model():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -46,10 +44,6 @@ class EntityRecognition():
             self.word_list = [token.lemma_ for token in nlp(self.sentence) if (not token.is_punct) & (token.pos_ != 'PROPN')]
             print("No entities detected.")
 
-    def token_lem(self, sentence):
-        """Get the lemmatized tokens of a sentence."""
-        word_list = [token.lemma_ for token in self.nlp(sentence) if not token.is_punct]
-        return word_list
             
     def find_entities(self):
         # we only append IDs in these lists!

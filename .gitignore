@@ -4,3 +4,4 @@ src/preprocessing/__pycache__/*
 src/training/__pycache__/*
 src/question_handling/__pycache__/*
 inspect_data.ipynb
+archive/*

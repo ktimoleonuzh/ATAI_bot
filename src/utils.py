@@ -44,13 +44,15 @@ def unzip_file(zip_file, destination_dir):
     # Optionally delete the zip file
     os.remove(zip_file)
 
-def load_resources():
+def load_resources(nlp_only = False):
     """Load all models and dictionaries ."""
     nlp = spacy.load("en_core_web_md")
     nlp.add_pipe("entityLinker", last=True)
     ner = pipeline('ner')
-    # TODO: move to data loading
-    return nlp, ner
+    if nlp_only:
+        return nlp
+    else:
+        return nlp, ner
 
 # KNOWLEDGE GRAPH LOADING
 def load_graph(graph_path, format='turtle'):

@@ -9,7 +9,7 @@ import torch.nn as nn
 import numpy as np
 from torch.utils.data import DataLoader
 from src.training.model import NeuralNet
-from src.utils import load_json, load_training_config
+from src.utils import load_json, load_training_config, load_resources
 from src.training.training_dataset import process_intents, ChatDataset
 
 def bag_of_words(vocabulary, sentence):
@@ -74,7 +74,8 @@ def train_model(
 
 def main():
     intents = load_json('./data/intents.json')
-    vocabulary, documents, classes = process_intents(intents)
+    nlp = load_resources(nlp_only=True)
+    vocabulary, documents, classes = process_intents(intents, nlp)
     
     # Hyper-parameters: load from config
     input_size = len(vocabulary)

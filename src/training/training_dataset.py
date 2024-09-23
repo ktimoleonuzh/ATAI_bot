@@ -1,14 +1,14 @@
 import random
 from torch.utils.data import Dataset
 
-def process_intents(intents):
+def process_intents(intents, nlp):
     """Process intents for training."""
     vocabulary = []
     documents = []
     classes = []
     for intent in intents['intents']:
         for pattern in intent['patterns']:
-            word_list = (pattern)
+            word_list = [token.lemma_ for token in nlp(pattern) if not token.is_punct]
             vocabulary.extend(word_list)
             documents.append((word_list, intent['tag']))
             if intent['tag'] not in classes:

@@ -178,7 +178,7 @@ def prepare_data():
     # Load the RDF graph
     graph = load_graph(data_config['paths']['graph'])
     # Process movie-related predicates
-    find_movie_predicates(graph)
+    find_movie_predicates(film_entities, graph)
     # Update predicate dictionary with crowd-sourced data
     # update_predicate_dict_with_crowd_data(graph) # TODO: not working yet
     # Generate entity-to-label and label-to-entity mappings

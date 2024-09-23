@@ -2,7 +2,7 @@ import torch
 from difflib import SequenceMatcher
 from src.training.model import NeuralNet
 from src.global_variables import special_chars, film_entities, header
-from src.utils import load_pickle, load_training_config
+from src.utils import load_pickle, load_training_config, load_data_config
 
 # TODO: fix token_lem duplicates
 
@@ -33,10 +33,11 @@ class EntityRecognition():
         self.graph = graph
         self.nlp = nlp
         self.ner = ner
-        self.all_movies_dict = load_pickle('./data/all_movies_dict.pickle')
-        self.all_people_dict = load_pickle('./data/all_people_dict.pickle')
-        self.special_movies = load_pickle('./data/special_movies.pickle')
-        self.indirectSubclassOf_entities = load_pickle('./data/indirectSubclassOf_entities.pickle')
+        self.data_config = load_data_config()
+        self.all_movies_dict = load_pickle(self.data_config['paths']['all_movies_dict'])
+        self.all_people_dict = load_pickle(self.data_config['paths']['all_people_dict'])
+        self.special_movies = load_pickle(self.data_config['paths']['special_movies'])
+        self.indirectSubclassOf_entities = load_pickle(self.data_config['paths']['indirectSubclassOf_entities'])
         self.movies, self.people, self.misc = self.find_entities()
         self.linked_entities = self.map_all_entities()
         if self.linked_entities is not None:

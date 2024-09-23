@@ -9,17 +9,14 @@ import random
 from sklearn.metrics import pairwise_distances
 from src.utils import (
     load_embeddings,
-    load_pickle
+    load_pickle,
+    load_data_config
     )
 from src.global_variables import WD
 
-entity_emb, relation_emb, ent2id, id2ent, rel2id, id2rel = load_embeddings(
-    './data/ddis-graph-embeddings/entity_embeds.npy',
-    './data/ddis-graph-embeddings/relation_embeds.npy',
-    './data/ddis-graph-embeddings/entity_ids.del',
-    './data/ddis-graph-embeddings/relation_ids.del'
-)
-ent2lbl = load_pickle('./data/ent2lbl.pickle')
+data_config = load_data_config()
+entity_emb, relation_emb, ent2id, id2ent, rel2id, id2rel = load_embeddings()
+ent2lbl = load_pickle(data_config['paths_processed']['ent2lbl'])    
 
 class Rec_Response():
     def __init__(self, graph, linked_entities, intent_responses):

@@ -12,13 +12,23 @@ paths_processed:
   ent2lbl: data/processed/ent2lbl.pkl
   lbl2ent: data/processed/lbl2ent.pkl
   predicate_dict: data/processed/predicate_dict.pkl
-  crowd_predicates: data/processed/crowd_predicates.pkl
-  aggr_ans_dict: data/processed/aggr_ans_dict.pkl
-  fixed_triples: data/processed/fixed_triples.pkl
-  added_triples: data/processed/added_triples.pkl
-  indirectSubclassOf_triples: data/processed/indirectSubclassOf_triples.pkl
-  indirectSubclassOf_entities: data/processed/indirectSubclassOf_entities.pkl
+  crowd_predicates: data/processed/crowd_predicates.pickle
+  all_movies_dict: data/processed/all_movies_dict.pickle
+  all_people_dict: data/processed/all_people_dict.pickle
+  aggr_ans_dict: data/processed/aggr_ans_dict.pickle
+  fixed_triples: data/processed/fixed_triples.pickle
+  added_triples: data/processed/added_triples.pickle
+  indirectSubclassOf_triples: data/processed/indirectSubclassOf_triples.pickle
+  indirectSubclassOf_entities: data/processed/indirectSubclassOf_entities.pickle
   special_movies: data/processed/special_movies.pkl
+  updated_graph: data/processed/updated_graph.nt
+
+paths_embeddings:
+  embeddings_dir: data/ddis/embeddings/ddis-graph-embeddings/
+  entity_emb: data/ddis/embeddings/ddis-graph-embeddings/entity_embeds.npy
+  relation_emb: data/ddis/embeddings/ddis-graph-embeddings/relation_embeds.npy
+  entity_file: data/ddis/embeddings/ddis-graph-embeddings/entity_ids.del
+  relation_file: data/ddis/embeddings/ddis-graph-embeddings/relation_ids.del
 
 urls:
   base_url: https://files.ifi.uzh.ch/ddis/teaching/2023/ATAI/dataset/

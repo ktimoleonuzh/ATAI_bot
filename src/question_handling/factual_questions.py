@@ -10,7 +10,8 @@ from sklearn.metrics import pairwise_distances
 from src.nlp_utils import get_key_from_value, best_match
 from src.utils import (
     load_embeddings,
-    load_pickle
+    load_pickle,
+    load_data_config
     )
 from src.global_variables import (
     header,
@@ -18,17 +19,14 @@ from src.global_variables import (
     WD
 )
 
-entity_emb, relation_emb, ent2id, id2ent, rel2id, id2rel = load_embeddings(
-    './data/ddis-graph-embeddings/entity_embeds.npy',
-    './data/ddis-graph-embeddings/relation_embeds.npy',
-    './data/ddis-graph-embeddings/entity_ids.del',
-    './data/ddis-graph-embeddings/relation_ids.del'
-)
+entity_emb, relation_emb, ent2id, id2ent, rel2id, id2rel = load_embeddings()
 
-crowd_predicates = load_pickle('./data/crowd_predicates.pickle')
-all_movies_dict = load_pickle('./data/all_movies_dict.pickle')
-predicate_dict = load_pickle('./data/predicate_dict.pickle')
-ent2lbl = load_pickle('./data/ent2lbl.pickle')
+data_config = load_data_config()
+
+crowd_predicates = load_pickle(data_config['paths_processed']['crowd_predicates'])
+all_movies_dict = load_pickle(data_config['paths_processed']['all_movies_dict'])
+predicate_dict = load_pickle(data_config['paths_processed']['predicate_dict'])
+ent2lbl = load_pickle(data_config['paths_processed']['ent2lbl'])
 
 
 

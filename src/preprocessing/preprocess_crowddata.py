@@ -6,9 +6,11 @@ Created on Mon Dec 12 20:05:03 2022
 """
 import pandas as pd
 import numpy as np
+from src.utils import load_data_config, load_pickle
 from statsmodels.stats import inter_rater as irr
 
-crowd_data = pd.read_csv('./data/crowd_data.tsv', sep='\t')
+data_config = load_data_config()
+crowd_data = load_pickle(data_config['paths']['crowd_data'])
 
 def track_fast_deceivers(crowd_data):
     min_WorkTime = 10

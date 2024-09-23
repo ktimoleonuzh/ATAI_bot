@@ -66,8 +66,13 @@ def load_graph(graph_path, format='turtle'):
         return None
 
 # EMBEDDING LOADING
-def load_embeddings(entity_emb_path, relation_emb_path, entity_file, relation_file):
+def load_embeddings():
     """Load entity and relation embeddings along with their mappings."""
+    data_config = load_data_config()
+    entity_emb_path = data_config['paths_embeddings']['entity_emb']
+    relation_emb_path = data_config['paths_embeddings']['relation_emb']
+    entity_file = data_config['paths_embeddings']['entity_file']
+    relation_file = data_config['paths_embeddings']['relation_file']
     try:
         entity_emb = np.load(entity_emb_path)
         relation_emb = np.load(relation_emb_path)

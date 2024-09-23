@@ -36,7 +36,7 @@ else:
     # Check for the image data file
     if not os.path.exists('data/ddis/images.json'):
         print(f"--- Image data file not found. Building the data... ---")
-        download_image_data
+        download_image_data()
     # Check for the crowd data file
     if not os.path.exists('data/ddis/crowd_data.tsv'):
         print(f"--- Crowd data file not found. Building the data... ---")

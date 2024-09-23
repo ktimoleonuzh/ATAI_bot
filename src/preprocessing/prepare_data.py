@@ -165,14 +165,13 @@ def generate_special_movies(movies):
     data_config = load_data_config()
     special_movies = [movie for movie in movies if any(char in movie for char in special_chars)]
     save_pickle(special_movies, data_config['paths_processed']['special_movies'])
- 
-    
-def main():
+
+def prepare_data():
     # Download required files
     download_graph()
-    download_crowd_data()
     download_embeddings()
     download_image_data()
+    download_crowd_data()
 
     # Load configurations
     data_config = load_data_config()
@@ -181,7 +180,7 @@ def main():
     # Process movie-related predicates
     find_movie_predicates(graph)
     # Update predicate dictionary with crowd-sourced data
-    update_predicate_dict_with_crowd_data(graph) # TODO: not working yet
+    # update_predicate_dict_with_crowd_data(graph) # TODO: not working yet
     # Generate entity-to-label and label-to-entity mappings
     generate_label_mappings(graph)
     # Generate special movies

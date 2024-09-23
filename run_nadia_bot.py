@@ -11,6 +11,7 @@ from src.preprocessing.prepare_data import (
     generate_special_movies
 )
 from src.utils import load_credentials, load_training_config
+from src.global_variables import film_entities
 from src.training.train import train_model
 from src.agent import MyBot
 
@@ -43,7 +44,7 @@ else:
     # Check for the predicates dictionary
     if not os.path.exists('data/processed/predicate_dict.pkl'):
         print(f"--- Movie predicates dictionary not found. Building the data... ---")
-        find_movie_predicates()
+        find_movie_predicates(film_entities)
     # Check for the label mappings
     if not os.path.exists('data/processed/ent2lbl.pkl') or not os.path.exists('data/processed/lbl2ent.pkl'):
         print(f"--- Label mappings not found. Building the data... ---")
@@ -51,7 +52,7 @@ else:
     # Check for the special movies
     if not os.path.exists('data/processed/special_movies.pkl'):
         print(f"--- Special movies not found. Building the data... ---")
-        generate_special_movies()
+        generate_special_movies(film_entities)
 print("--- Data directory check complete ---")
 
 # Then, check if the classifier model exists
@@ -66,5 +67,5 @@ else:
 # Initialize the bot
 username, password, url = load_credentials()
 mybot = MyBot(username, password, url)
-# mybot.setup()
+mybot.setup()
 mybot.listen()

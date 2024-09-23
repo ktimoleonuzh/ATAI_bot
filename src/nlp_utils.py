@@ -220,8 +220,12 @@ class EntityRecognition():
         return ent_descr
     
 def get_key_from_value(value, dictionary):
-    key = list(dictionary.keys())[list(dictionary.values()).index(value)]
-    return key
+    try:
+        key = list(dictionary.keys())[list(dictionary.values()).index(value)]
+        return key
+    except ValueError:
+        print(f"Warning: '{value}' not found in dictionary.")
+        return None
 
 def best_match(pattern, candidates):
     best_match_label = None

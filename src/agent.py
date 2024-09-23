@@ -45,12 +45,12 @@ class MyBot:
                     room_id = room['uid']
                     if not self.chat_state[room_id]['initiated']:  # check whether the chatroom has been initiated (default: False)
                         # send a welcome message and get the alias of the agent in the chatroom
-                        self.post_message(room_id=room_id, session_token=self.session_token, message='Welcome! I\'m here to answer all your movie-related questions.')
+                        self.post_message(room_id=room_id, message='Welcome! I\'m here to answer all your movie-related questions.')
                         self.chat_state[room_id]['initiated'] = True
                         self.chat_state[room_id]['my_alias'] = room['alias']
 
                     # check for all messages
-                    all_messages = self.check_room_state(room_id=room_id, since=0, session_token=self.session_token)['messages']
+                    all_messages = self.check_room_state(room_id=room_id, since=0)['messages']
 
                     for message in all_messages:
                         if message['authorAlias'] != self.chat_state[room_id]['my_alias']:  # make sure that you're not echoing your own message
@@ -60,7 +60,7 @@ class MyBot:
                                 self.chat_state[room_id]['messages'][message['ordinal']] = message  # "log" the message to the chatrooms history
                                 print('\t- Chatroom {} - new message #{}: \'{}\' - {}'.format(room_id, message['ordinal'], message['message'], self.get_time()))
                                 response = self.get_response(message['message'])
-                                self.post_message(room_id=room_id, session_token=self.session_token, message=response)
+                                self.post_message(room_id=room_id, message=response)
                         
             time.sleep(listen_freq)
 
@@ -75,7 +75,7 @@ class MyBot:
     def check_room_state(self, room_id: str, since: int):
         return requests.get(url=self.url + "/api/room/{}/{}".format(room_id, since), params={"roomId": room_id, "since": since, "session": self.session_token}).json()
 
-    def post_message(self, room_id: str,message: str):
+    def post_message(self, room_id: str, message: str):
         tmp_des = requests.post(url=self.url + "/api/room/{}".format(room_id),
                                 params={"roomId": room_id, "session": self.session_token}, data=message.encode('utf-8')).json()
         if tmp_des['description'] != 'Message received':

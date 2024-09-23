@@ -9,34 +9,36 @@ from src.nlp_utils import EntityRecognition, setup_answer_classifier_model
 from src.question_handling.factual_questions import Query_Response
 from src.question_handling.multimedia_questions import Multimedia_Response
 from src.question_handling.recommendation_questions import Rec_Response
-from src.utils import load_graph, load_json, load_resources
+from src.utils import load_graph, load_json, load_resources, load_data_config
 from src.training.train import bag_of_words
 
 listen_freq = 2
 
 class MyBot:
-    def __init__(self, username, password, url ,graph, image_data):
+    def __init__(self, username, password, url):
         self.username = username
         self.password = password
         self.url = url
-        self.agent_details = self.login(self.username, self.password, self.url)
+        self.agent_details = self.login()
         self.session_token = self.agent_details['sessionToken']
         self.chat_state = defaultdict(lambda: {'messages': defaultdict(dict), 'initiated': False, 'my_alias': None})
-        self.kg_graph = load_graph('./data/updated_graph.nt') # TODO: config path
-        self.image_data = load_json('./data/images.json') # TODO: config the path
-
-
         atexit.register(self.logout)
 
-    def listen(self):
+    def setup(self):
+        self.data_config = load_data_config()
+        print(f"- Loading all necessary data for bot {self.username}...")
+        self.kg_graph = load_graph(self.data_config['paths_processed']['updated_graph'])
+        self.image_data = load_json(self.data_config['paths']['images'])
         print(f"- Setting up the answer classifier model for bot {self.username}...")
         self.model, self.device, self.vocabulary, self.tags = setup_answer_classifier_model()
         print(f"-  Setting up all relevant NLP resources for bot {self.username}...")
         self.nlp, self.ner = load_resources()
+
+    def listen(self):
         print(f"- Bot {self.username} is now listening for new messages...")
         while True:
             # check for all chatrooms
-            current_rooms = self.check_rooms(session_token=self.session_token)['rooms']
+            current_rooms = self.check_rooms()['rooms']
             for room in current_rooms:
                 # ignore finished conversations
                 if room['remainingTime'] > 0:

@@ -32,10 +32,10 @@ class EntityRecognition():
         self.nlp = nlp
         self.ner = ner
         self.data_config = load_data_config()
-        self.all_movies_dict = load_pickle(self.data_config['paths']['all_movies_dict'])
-        self.all_people_dict = load_pickle(self.data_config['paths']['all_people_dict'])
-        self.special_movies = load_pickle(self.data_config['paths']['special_movies'])
-        self.indirectSubclassOf_entities = load_pickle(self.data_config['paths']['indirectSubclassOf_entities'])
+        self.all_movies_dict = load_pickle(self.data_config['paths_processed']['all_movies_dict'])
+        self.all_people_dict = load_pickle(self.data_config['paths_processed']['all_people_dict'])
+        self.special_movies = load_pickle(self.data_config['paths_processed']['special_movies'])
+        self.indirectSubclassOf_entities = load_pickle(self.data_config['paths_processed']['indirectSubclassOf_entities'])
         self.movies, self.people, self.misc = self.find_entities()
         self.linked_entities = self.map_all_entities()
         if self.linked_entities is not None:

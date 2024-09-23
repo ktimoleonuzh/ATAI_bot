@@ -112,7 +112,7 @@ class MyBot:
         probs = torch.softmax(output, dim=1)
         prob = probs[0][predicted.item()]
         if prob.item() > 0.75:
-            for intent in intents['intents']:
+            for intent in intents['intents']: # loop through all intents (question contexts)
                 if tag == intent["tag"]:
                     try:  # making sure that the script won't crash in case something unexpected happens
                         print("Tag detected: {}".format(tag))

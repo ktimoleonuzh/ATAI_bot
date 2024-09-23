@@ -233,7 +233,3 @@ def best_match(pattern, candidates):
                 best_match_size = match.size
                 best_match_label = cand
     return best_match_label
-
-def get_key_from_value(value, dictionary):
-    key = list(dictionary.keys())[list(dictionary.values()).index(value)]
-    return key

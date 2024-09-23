@@ -44,11 +44,17 @@ def unzip_file(zip_file, destination_dir):
     # Optionally delete the zip file
     os.remove(zip_file)
 
-def load_resources(nlp_only = False):
-    """Load all models and dictionaries ."""
+def load_resources(nlp_only=False):
+    """Load all models and dictionaries.""" 
+    # Load the Spacy model and add the entity linker
     nlp = spacy.load("en_core_web_md")
     nlp.add_pipe("entityLinker", last=True)
-    ner = pipeline('ner')
+    # Specify the exact model and revision for the NER pipeline
+    model_name = "dbmdz/bert-large-cased-finetuned-conll03-english"
+    revision = "f2482bf"
+    # Create the NER pipeline with the specified model and revision
+    ner = pipeline('ner', model=model_name, revision=revision)
+    
     if nlp_only:
         return nlp
     else:

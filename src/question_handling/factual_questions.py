@@ -29,7 +29,6 @@ predicate_dict = load_pickle(data_config['paths_processed']['predicate_dict'])
 ent2lbl = load_pickle(data_config['paths_processed']['ent2lbl'])
 
 
-
 class Query_Response:
     def __init__(self, tag, graph, linked_entities, intent_responses, sentence):
         self.tag = tag

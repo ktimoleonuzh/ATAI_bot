@@ -6,3 +6,5 @@ src/question_handling/__pycache__/*
 inspect_data.ipynb
 archive/*
 inspect_NER.ipynb
+inspect_data.ipynb
+generate_aux_data.ipynb

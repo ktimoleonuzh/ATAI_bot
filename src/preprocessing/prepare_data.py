@@ -184,4 +184,4 @@ def prepare_data():
     # Generate entity-to-label and label-to-entity mappings
     generate_label_mappings(graph)
     # Generate special movies
-    generate_special_movies(film_entities)
+    # generate_special_movies() TODO: not working properly, need to pass movies list
